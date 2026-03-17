@@ -1,0 +1,157 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --pink: #e91e8c;
+  --pink-light: #f8bbd0;
+  --pink-dark: #c2185b;
+  --purple: #9c27b0;
+  --bg: #fff5f8;
+  --card: #ffffff;
+  --text: #2d2d2d;
+  --text-muted: #757575;
+  --border: #f0d0dc;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(233,30,140,0.08);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app-layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #e91e8c 0%, #9c27b0 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  position: fixed;
+  height: 100vh;
+  z-index: 100;
+}
+.sidebar-logo { padding: 0 1.5rem 1.5rem; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; }
+.sidebar-logo span { font-size: 1.5rem; }
+.sidebar nav { flex: 1; }
+.sidebar nav a {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 1.5rem; color: rgba(255,255,255,0.85);
+  text-decoration: none; font-size: 0.9rem; transition: all 0.2s;
+}
+.sidebar nav a:hover, .sidebar nav a.active {
+  background: rgba(255,255,255,0.15); color: white;
+}
+.sidebar-footer { padding: 1rem 1.5rem; }
+.sidebar-footer button {
+  width: 100%; padding: 0.6rem; background: rgba(255,255,255,0.15);
+  border: none; color: white; border-radius: 8px; cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Main content */
+.main-content { margin-left: 240px; flex: 1; padding: 2rem; }
+
+/* Cards */
+.card {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 1.5rem; border: 1px solid var(--border);
+}
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.stat-card {
+  background: var(--card); border-radius: var(--radius); padding: 1.25rem;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--pink); }
+.stat-card .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+/* Forms */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 0.9rem; background: white; transition: border 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--pink);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.65rem 1.4rem; border: none; border-radius: 8px;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-primary { background: var(--pink); color: white; }
+.btn-primary:hover { background: var(--pink-dark); }
+.btn-secondary { background: var(--pink-light); color: var(--pink-dark); }
+.btn-danger { background: #ffebee; color: #c62828; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Page header */
+.page-header { margin-bottom: 1.5rem; }
+.page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--pink-dark); }
+.page-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
+
+/* Auth pages */
+.auth-container {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+}
+.auth-card {
+  background: white; border-radius: 16px; padding: 2.5rem;
+  width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(233,30,140,0.12);
+}
+.auth-card h1 { text-align: center; color: var(--pink); margin-bottom: 0.5rem; font-size: 1.6rem; }
+.auth-card p { text-align: center; color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
+
+/* Chat */
+.chat-container { display: flex; flex-direction: column; height: calc(100vh - 8rem); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.chat-bubble { max-width: 70%; padding: 0.75rem 1rem; border-radius: 16px; font-size: 0.9rem; line-height: 1.5; }
+.chat-bubble.user { background: var(--pink); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-bubble.assistant { background: white; border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-input-row { display: flex; gap: 0.75rem; padding: 1rem; border-top: 1px solid var(--border); }
+.chat-input-row input { flex: 1; padding: 0.75rem 1rem; border: 1.5px solid var(--border); border-radius: 24px; font-size: 0.9rem; }
+.chat-input-row input:focus { outline: none; border-color: var(--pink); }
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.data-table th { background: var(--pink-light); color: var(--pink-dark); padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+.data-table tr:hover td { background: #fff5f8; }
+
+/* Badge */
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.badge-pink { background: var(--pink-light); color: var(--pink-dark); }
+.badge-purple { background: #f3e5f5; color: #7b1fa2; }
+.badge-green { background: #e8f5e9; color: #2e7d32; }
+
+/* Loading */
+.loading { display: flex; align-items: center; justify-content: center; padding: 3rem; color: var(--text-muted); }
+
+/* Typing animation */
+.typing-dots::after {
+  content: '...';
+  animation: dots 1.2s steps(3, end) infinite;
+}
+@keyframes dots {
+  0%, 20%  { content: '.'; }
+  40%      { content: '..'; }
+  60%,100% { content: '...'; }
+}
+
+/* Phase indicator */
+.phase-card { border-radius: var(--radius); padding: 1.25rem; color: white; }
+.phase-menstrual { background: linear-gradient(135deg, #e91e8c, #c2185b); }
+.phase-follicular { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.phase-ovulation { background: linear-gradient(135deg, #ff9800, #f57c00); }
+.phase-luteal { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .main-content { margin-left: 0; padding: 1rem; }
+}
