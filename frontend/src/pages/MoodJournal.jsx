@@ -104,6 +104,11 @@ export default function MoodJournal() {
                       </button>
                     </div>
                     {e.content && <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{e.content}</p>}
+                    {e.ai_advice && (
+                      <div style={{ marginTop: '0.75rem', background: '#fff5f8', borderLeft: '3px solid var(--pink)', padding: '0.6rem 0.8rem', borderRadius: 6, fontSize: '0.8rem', color: '#4a1944', lineHeight: 1.5 }}>
+                        <strong>AI suggestion:</strong> {e.ai_advice}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

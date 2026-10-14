@@ -44,9 +44,10 @@ export default function ExportReport() {
             {[
               'Next predicted period date',
               'Full cycle history (last 12 cycles)',
-              'Symptom log (last 15 entries)',
-              'Mood journal summary',
-              'Health disclaimer',
+              'Symptom log with AI advice',
+              'Mood journal summary with wellbeing prompts',
+              'Cycle-aware diet and remedy guidance',
+              'Health disclaimer and phase insights',
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>

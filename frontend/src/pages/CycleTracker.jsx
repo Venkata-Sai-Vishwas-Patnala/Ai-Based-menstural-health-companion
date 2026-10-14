@@ -9,6 +9,41 @@ import {
 
 const today = () => new Date().toISOString().split('T')[0]
 
+const getFormValidationError = (form, cycles = []) => {
+  const start = form.start_date
+  const end = form.end_date
+  if (!start) return 'Please choose a period start date.'
+  if (start > today()) return 'Period start date cannot be in the future.'
+  if (end && end < start) return 'End date cannot be before the start date.'
+  if (end && end > today()) return 'Period end date cannot be in the future.'
+
+  for (const cycle of cycles) {
+    if (!cycle.start_date) continue
+    const existingStart = cycle.start_date
+    const existingEnd = cycle.end_date || cycle.start_date
+    const newStart = new Date(start)
+    const newEnd = end ? new Date(end) : new Date(start)
+    const existingStartDate = new Date(existingStart)
+    const existingEndDate = new Date(existingEnd)
+
+    if (start === existingStart) {
+      return 'This period start date already exists.'
+    }
+
+    const overlap = Math.max(newStart.getTime(), existingStartDate.getTime()) <= Math.min(newEnd.getTime(), existingEndDate.getTime())
+    if (overlap) {
+      return 'This period overlaps an existing logged cycle.'
+    }
+
+    const daysSincePrevious = Math.floor((newStart.getTime() - existingStartDate.getTime()) / 86400000)
+    if (daysSincePrevious > 0 && daysSincePrevious < 21) {
+      return 'A new period entry is too close to a recent cycle.'
+    }
+  }
+
+  return ''
+}
+
 const QUICK_SYMPTOMS = [
   { label: 'Cramps',            Icon: IconFlame },
   { label: 'Headache',          Icon: IconAlertCircle },
@@ -27,6 +62,7 @@ export default function CycleTracker() {
   const [form, setForm] = useState({ start_date: today(), end_date: '', flow_intensity: 'medium', notes: '' })
   const [loading, setLoading] = useState(false)
   const [quickLogging, setQuickLogging] = useState(null)
+  const validationError = getFormValidationError(form, cycles)
 
   const load = async () => {
     const [c, p, s] = await Promise.all([
@@ -43,12 +79,17 @@ export default function CycleTracker() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const error = getFormValidationError(form, cycles)
+    if (error) {
+      toast.error(error)
+      return
+    }
+
     setLoading(true)
     try {
       await api.post('/cycle/', { ...form, end_date: form.end_date || null })
       toast.success('Cycle logged!')
       setForm({ start_date: today(), end_date: '', flow_intensity: 'medium', notes: '' })
-      await api.post('/prediction/').catch(() => {})
       load()
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to log cycle')
@@ -123,15 +164,30 @@ export default function CycleTracker() {
       <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: '1.5rem' }}>
         {/* ── Log Form ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem', color: 'var(--pink-dark)' }}>Log New Cycle</h3>
+          <h3 style={{ marginBottom: '0.75rem', color: 'var(--pink-dark)' }}>Log New Cycle</h3>
+          <div className="helper-text" style={{ marginBottom: '1rem' }}>
+            Smart validation keeps entries realistic and prevents overlapping periods.
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Period Start Date</label>
-              <input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} required />
+              <input
+                type="date"
+                value={form.start_date}
+                max={today()}
+                onChange={e => setForm({ ...form, start_date: e.target.value })}
+                required
+              />
             </div>
             <div className="form-group">
               <label>Period End Date (optional)</label>
-              <input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} />
+              <input
+                type="date"
+                value={form.end_date}
+                max={today()}
+                min={form.start_date || undefined}
+                onChange={e => setForm({ ...form, end_date: e.target.value })}
+              />
             </div>
             <div className="form-group">
               <label>Flow Intensity</label>
@@ -145,7 +201,19 @@ export default function CycleTracker() {
               <label>Notes</label>
               <textarea rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
             </div>
-            <button className="btn btn-primary" disabled={loading}>{loading ? 'Saving…' : 'Log Cycle'}</button>
+            {validationError && (
+              <div className="inline-alert error" role="alert">
+                {validationError}
+              </div>
+            )}
+            {!validationError && (
+              <div className="inline-alert success">
+                Entry looks consistent with a normal cycle pattern.
+              </div>
+            )}
+            <button className="btn btn-primary" disabled={loading || !!validationError}>
+              {loading ? 'Saving…' : 'Log Cycle'}
+            </button>
           </form>
         </div>
 
@@ -165,9 +233,6 @@ export default function CycleTracker() {
                 {prediction.last_3_lengths?.length > 0 && (
                   <span>Last {prediction.last_3_lengths.length}: <strong>{prediction.last_3_lengths.join(', ')} days</strong></span>
                 )}
-                <span style={{ color: prediction.std_dev <= 4 ? '#2e7d32' : '#e65100', fontStyle: 'italic' }}>
-                  {prediction.regularity}
-                </span>
               </div>
             </div>
           ) : (

@@ -39,7 +39,9 @@ export default function DietRecommendation() {
 
   if (!diet) return <div className="loading">Loading recommendations...</div>
 
-  const { phase, cycle_day, recommendations } = diet
+  const { phase, cycle_day, recommendations, severity_label } = diet
+  const dailyAdvice = recommendations.daily_advice || recommendations.tips || 'Keep your routine consistent and listen to your body’s signals today.'
+  const mealVariants = recommendations.diet_variants || []
 
   return (
     <div>
@@ -48,12 +50,21 @@ export default function DietRecommendation() {
         <p>Nutrition guidance tailored to your cycle phase</p>
       </div>
 
-      {/* Current phase hero card */}
+      <div className="card" style={{ marginBottom: '1rem', borderLeft: '4px solid var(--pink)', background: '#fffafc' }}>
+        <h3 style={{ marginBottom: '0.5rem', color: 'var(--pink-dark)' }}>Today’s AI Wellness Advice</h3>
+        <p style={{ lineHeight: 1.6, color: '#5d2a47', fontSize: '0.95rem' }}>{dailyAdvice}</p>
+      </div>
+
       <div className={`phase-card ${PHASE_COLORS[phase]}`} style={{ marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
         <div style={{ opacity: 0.9, flexShrink: 0 }}>{PHASE_SVG[phase]}</div>
         <div style={{ flex: 1 }}>
           <h2 style={{ marginBottom: '0.25rem' }}>{PHASE_LABELS[phase]}</h2>
           <p style={{ opacity: 0.85, fontSize: '0.9rem', marginBottom: '0.5rem' }}>Day {cycle_day} of your cycle</p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+            <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', borderRadius: 999, padding: '0.25rem 0.6rem', fontSize: '0.7rem', fontWeight: 700 }}>
+              Severity: {severity_label || recommendations.severity_label || 'low'}
+            </span>
+          </div>
           <p style={{ opacity: 0.95, fontSize: '0.95rem' }}>{recommendations.description}</p>
           <p style={{ marginTop: '0.75rem', opacity: 0.9, fontStyle: 'italic', fontSize: '0.9rem' }}>{recommendations.tips}</p>
         </div>
@@ -117,6 +128,27 @@ export default function DietRecommendation() {
         <div className="card">
           <h3 style={{ marginBottom: '0.75rem', color: 'var(--pink-dark)' }}>Hydration Guide</h3>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{recommendations.hydration}</p>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: '1rem' }}>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--pink-dark)' }}>Ready-made meal ideas</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+          {mealVariants.length > 0 ? mealVariants.map((variant, index) => (
+            <div key={`${variant.name}-${index}`} style={{ border: '1px solid rgba(233,30,140,0.15)', borderRadius: 12, padding: '0.8rem', background: '#fff9fb' }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.55rem', color: 'var(--pink-dark)' }}>{variant.name}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {variant.foods.map((food, foodIndex) => (
+                  <div key={`${food.name}-${foodIndex}`}>
+                    <div style={{ fontWeight: 600, fontSize: '0.82rem' }}>{food.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{food.reason}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )) : (
+            <p style={{ color: 'var(--text-muted)', margin: 0 }}>No ready-made meal ideas available for this phase yet.</p>
+          )}
         </div>
       </div>
 

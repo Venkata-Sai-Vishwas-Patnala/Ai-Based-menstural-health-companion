@@ -158,10 +158,6 @@ def predict_next_cycle(
 
     from statistics import stdev as _std
     std_dev = round(_std(valid_lengths), 1) if len(valid_lengths) >= 2 else 0.0
-    regularity = (
-        "Your cycle is regular" if std_dev <= 4
-        else "Your cycle varies — predictions may be less accurate"
-    )
 
     # ── Fallback: fewer than 3 valid cycles → use rolling mean ───────────────
     if len(valid_lengths) < 3:
@@ -208,6 +204,5 @@ def predict_next_cycle(
         "confidence_label": _confidence_label(confidence),
         "avg_cycle_length": mean_len,
         "last_3_lengths": valid_lengths[-3:],
-        "regularity": regularity,
         "std_dev": std_dev,
     }

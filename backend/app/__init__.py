@@ -1,1 +1,1 @@
-from app.main import app
+"""Menstrual health companion application package."""

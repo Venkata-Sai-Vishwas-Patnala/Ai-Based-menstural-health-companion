@@ -11,6 +11,21 @@ from app.services.email_service import send_mood_alert
 router = APIRouter(prefix="/journal", tags=["journal"])
 
 
+def _build_journal_advice(payload: JournalCreate) -> str:
+    mood = (payload.mood or "neutral").lower()
+    energy = payload.energy_level or 5
+    score = payload.mood_score or 5
+    if score <= 3:
+        return "Your mood is low right now. Gentle movement, hydration, extra rest, and a supportive check-in can help. If this pattern keeps repeating, consider discussing it with a healthcare professional."
+    if energy <= 3:
+        return "Your energy feels low, so it may help to keep your routine lighter and prioritize sleep, protein, and a shorter walk. Try reducing overstimulation for the next day or two."
+    if "anxious" in mood or "irritable" in mood:
+        return "This mood pattern often responds well to calm routines, less caffeine, consistent meals, and some quiet reset time. Journaling and a short walk can help regulate stress."
+    if "tired" in mood:
+        return "Your energy and mood suggest a lower-demand day is beneficial. Prioritize rest, hydration, and simple meals to support recovery."
+    return "This is a balanced mood and energy day. Keep your routine consistent, stay hydrated, and continue tracking early signs of stress or PMS so you can notice patterns sooner."
+
+
 @router.post("/", response_model=JournalOut, status_code=201)
 def create_entry(
     payload: JournalCreate,
@@ -18,6 +33,7 @@ def create_entry(
     current_user: User = Depends(get_current_user),
 ):
     entry = Journal(user_id=current_user.id, **payload.model_dump())
+    entry.ai_advice = _build_journal_advice(payload)
     db.add(entry)
     db.commit()
     db.refresh(entry)

@@ -92,7 +92,14 @@ export default function SymptomsTracker() {
                           {s.severity}/10
                         </span>
                       </td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{s.notes || '—'}</td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        {s.notes || '—'}
+                        {s.ai_advice && (
+                          <div style={{ marginTop: '0.5rem', color: '#7b1fa2', fontSize: '0.75rem', lineHeight: 1.4 }}>
+                            <strong>AI advice:</strong> {s.ai_advice}
+                          </div>
+                        )}
+                      </td>
                       <td>
                         <button className="btn btn-danger" style={{ padding: '0.3rem 0.6rem' }} onClick={() => deleteSymptom(s.id)}>
                           <Trash2 size={14} />

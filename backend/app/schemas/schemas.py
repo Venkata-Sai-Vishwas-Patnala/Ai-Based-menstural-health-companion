@@ -67,6 +67,7 @@ class CycleOut(CycleCreate):
     user_id: int
     cycle_length: Optional[int]
     period_length: Optional[int]
+    ai_advice: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -84,6 +85,7 @@ class SymptomCreate(BaseModel):
 class SymptomOut(SymptomCreate):
     id: int
     user_id: int
+    ai_advice: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -102,6 +104,7 @@ class JournalCreate(BaseModel):
 class JournalOut(JournalCreate):
     id: int
     user_id: int
+    ai_advice: Optional[str] = None
     created_at: datetime
 
     class Config:

@@ -49,17 +49,15 @@ def get_period_status(
     cycle_day = (today - latest.start_date).days + 1
     avg_cycle = current_user.average_cycle_length or 28
 
-    # Check if currently on period
     on_period = False
     period_day = None
     if latest.end_date:
         on_period = latest.start_date <= today <= latest.end_date
         period_day = (today - latest.start_date).days + 1 if on_period else None
-    elif cycle_day <= 7:  # no end_date logged, assume ~5 day period
+    elif cycle_day <= 7:
         on_period = cycle_day <= 5
         period_day = cycle_day if on_period else None
 
-    # Get prediction
     pred = (
         db.query(Prediction)
         .filter(Prediction.user_id == current_user.id)
@@ -69,11 +67,16 @@ def get_period_status(
     if pred:
         days_until_next = (pred.predicted_start_date - today).days
     elif len(cycles) >= 2:
-        days_until_next = avg_cycle - cycle_day
+        days_until_next = max(0, avg_cycle - cycle_day)
     else:
         days_until_next = None
 
     phase = _get_phase(cycle_day, avg_cycle)
+    ai_tip = latest.ai_advice or (
+        "Keep your routine gentle, stay hydrated, and listen to your body for signs of fatigue or bloating."
+        if on_period else
+        "Track your symptoms consistently and keep your meals steady to help your cycle stay predictable."
+    )
 
     return {
         "status": "on_period" if on_period else "tracking",
@@ -83,6 +86,7 @@ def get_period_status(
         "phase": phase,
         "days_until_next": days_until_next,
         "last_period_start": str(latest.start_date),
+        "ai_tip": ai_tip,
     }
 
 
@@ -100,25 +104,45 @@ def get_analytics(
     symptoms = db.query(Symptom).filter(Symptom.user_id == current_user.id).all()
     journals = db.query(Journal).filter(Journal.user_id == current_user.id).all()
 
-    # Cycle length trend
     cycle_trend = [
         {"date": str(c.start_date), "cycle_length": c.cycle_length}
         for c in cycles if c.cycle_length and 21 <= c.cycle_length <= 45
     ]
 
-    # Symptom frequency
     symptom_counts = Counter(s.symptom_type for s in symptoms)
     symptom_freq = [{"symptom": k, "count": v} for k, v in symptom_counts.most_common(10)]
 
-    # Mood trend
     mood_trend = [
         {"date": str(j.entry_date), "mood_score": j.mood_score, "mood": j.mood}
         for j in sorted(journals, key=lambda x: x.entry_date)
         if j.mood_score
     ]
 
-    # Summary stats — only physiologically valid lengths
     lengths = [c.cycle_length for c in cycles if c.cycle_length and 21 <= c.cycle_length <= 45]
+    avg_mood = round(sum(j.mood_score for j in journals if j.mood_score) / len([j for j in journals if j.mood_score]), 1) if any(j.mood_score for j in journals) else None
+    avg_severity = round(sum(s.severity for s in symptoms if s.severity is not None) / len([s for s in symptoms if s.severity is not None]), 1) if any(s.severity is not None for s in symptoms) else None
+    top_symptom = symptom_counts.most_common(1)[0][0] if symptom_counts else None
+
+    current_phase = "No data"
+    cycle_day = None
+    status = "No cycle data"
+    days_until_next = None
+    if cycles:
+        latest = cycles[-1]
+        cycle_day = (date.today() - latest.start_date).days + 1
+        cycle_day = max(1, cycle_day)
+        if cycle_day <= 5:
+            current_phase = "Menstrual"
+        elif cycle_day <= 13:
+            current_phase = "Follicular"
+        elif cycle_day <= 16:
+            current_phase = "Ovulation"
+        else:
+            current_phase = "Luteal"
+        status = "On period" if latest.end_date and latest.start_date <= date.today() <= latest.end_date else "Tracking"
+        avg_cycle = current_user.average_cycle_length or 28
+        days_until_next = max(0, avg_cycle - cycle_day)
+
     summary = {
         "total_cycles": len(cycles),
         "avg_cycle_length": round(sum(lengths) / len(lengths), 1) if lengths else None,
@@ -126,6 +150,13 @@ def get_analytics(
         "max_cycle_length": max(lengths) if lengths else None,
         "total_symptoms_logged": len(symptoms),
         "total_journal_entries": len(journals),
+        "avg_mood_score": avg_mood,
+        "avg_symptom_severity": avg_severity,
+        "top_symptom": top_symptom,
+        "current_phase": current_phase,
+        "cycle_day": cycle_day,
+        "status": status,
+        "days_until_next": days_until_next,
     }
 
     return {

@@ -196,12 +196,20 @@ export default function Dashboard() {
   const countdown = (daysUntil !== null && daysUntil >= 1 && daysUntil <= 7)
     ? PRE_PERIOD_PLAN[daysUntil]
     : null
+  const dailyGuidance = phase?.tips?.length
+    ? `Today’s guidance: ${phase.tips.slice(0, 3).join(' • ')}`
+    : 'Track your symptoms and keep a gentle rhythm today.'
 
   return (
     <div>
       <div className="page-header">
         <h1>Dashboard</h1>
         <p>Your menstrual health at a glance</p>
+      </div>
+
+      <div className="card" style={{ marginBottom: '1.25rem', borderLeft: '4px solid var(--pink)', background: '#fffafc' }}>
+        <h3 style={{ marginBottom: '0.5rem', color: 'var(--pink-dark)' }}>AI Daily Health Advice</h3>
+        <p style={{ lineHeight: 1.6, color: '#5d2a47', fontSize: '0.95rem' }}>{dailyGuidance}</p>
       </div>
 
       {/* ── Active Period Banner ── */}
@@ -377,9 +385,6 @@ export default function Dashboard() {
                 {prediction.last_3_lengths?.length > 0 && (
                   <span>Last {prediction.last_3_lengths.length} cycles: <strong>{prediction.last_3_lengths.join(', ')} days</strong></span>
                 )}
-                <span style={{ color: prediction.std_dev <= 4 ? '#2e7d32' : '#e65100', fontStyle: 'italic' }}>
-                  {prediction.regularity}
-                </span>
               </div>
             </div>
           ) : null

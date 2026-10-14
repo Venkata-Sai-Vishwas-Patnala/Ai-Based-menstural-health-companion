@@ -43,6 +43,7 @@ class Cycle(Base):
     period_length = Column(Integer)         # days of bleeding
     flow_intensity = Column(String)         # light / medium / heavy
     notes = Column(Text)
+    ai_advice = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="cycles")
@@ -57,6 +58,7 @@ class Symptom(Base):
     symptom_type = Column(String, nullable=False)   # cramps, headache, bloating …
     severity = Column(Integer)                       # 1-10
     notes = Column(Text)
+    ai_advice = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="symptoms")
@@ -72,6 +74,7 @@ class Journal(Base):
     mood_score = Column(Integer)    # 1-10
     energy_level = Column(Integer)  # 1-10
     content = Column(Text)
+    ai_advice = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="journals")

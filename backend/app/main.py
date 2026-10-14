@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.database import engine, Base
+from app.database import engine, Base, ensure_schema
 from app.services.scheduler import start_scheduler, stop_scheduler
 from app.api import auth, user, cycle, symptoms, journal, prediction, chatbot, diet, analytics, notifications, export
 
@@ -11,8 +11,8 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create all tables
     Base.metadata.create_all(bind=engine)
+    ensure_schema()
     start_scheduler()
     yield
     stop_scheduler()
